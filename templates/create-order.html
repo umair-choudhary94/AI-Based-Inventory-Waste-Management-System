@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl p-6 w-full  shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Create Order</h2>
+        </div>
+        <form id="create-order-form">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="recipe-select">
+                    Select Recipe
+                </label>
+                <div class="flex space-x-2">
+                    <select id="recipe-select" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg" required>
+                        <option value="">Choose Recipe</option>
+                        {% for recipe in recipes %}
+                            <option value="{{ recipe.id }}">{{ recipe.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" id="add-recipe-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+</button>
+                </div>
+            </div>
+        
+            <div id="order-items" class="space-y-4 mb-6">
+                <!-- Added recipes will appear here -->
+            </div>
+        
+            <div class="flex justify-end space-x-3">
+                <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                    Create Order
+                </button>
+            </div>
+        </form>
+        
+    </div>
+</div>
+<script>
+    const recipeSelect = document.getElementById('recipe-select');
+    const addBtn = document.getElementById('add-recipe-btn');
+    const orderItems = document.getElementById('order-items');
+
+    addBtn.addEventListener('click', () => {
+        const selectedId = recipeSelect.value;
+        const selectedText = recipeSelect.options[recipeSelect.selectedIndex].text;
+
+        if (!selectedId) return;
+
+        if (document.getElementById(`order-item-${selectedId}`)) {
+            alert("This recipe is already added.");
+            return;
+        }
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = "flex items-center justify-between p-4 bg-gray-100 rounded";
+        itemDiv.id = `order-item-${selectedId}`;
+
+        itemDiv.innerHTML = `
+            <div class="font-medium text-gray-800">${selectedText}</div>
+            <div class="flex items-center space-x-2">
+                <button type="button" class="qty-minus px-2 py-1 bg-gray-300 rounded">-</button>
+                <input type="number" data-recipe-id="${selectedId}" value="1" min="1" class="w-16 text-center border rounded qty-input">
+                <button type="button" class="qty-plus px-2 py-1 bg-gray-300 rounded">+</button>
+                <button type="button" class="remove-item px-2 py-1 bg-red-500 text-white rounded">×</button>
+            </div>
+        `;
+
+        orderItems.appendChild(itemDiv);
+        attachItemEvents(itemDiv);
+    });
+
+    function attachItemEvents(itemDiv) {
+        const minusBtn = itemDiv.querySelector('.qty-minus');
+        const plusBtn = itemDiv.querySelector('.qty-plus');
+        const qtyInput = itemDiv.querySelector('.qty-input');
+        const removeBtn = itemDiv.querySelector('.remove-item');
+
+        plusBtn.addEventListener('click', () => {
+            qtyInput.value = parseInt(qtyInput.value) + 1;
+        });
+
+        minusBtn.addEventListener('click', () => {
+            if (parseInt(qtyInput.value) > 1) {
+                qtyInput.value = parseInt(qtyInput.value) - 1;
+            }
+        });
+
+        removeBtn.addEventListener('click', () => {
+            itemDiv.remove();
+        });
+    }
+
+    // Final submission with clean JSON structure
+    document.getElementById('create-order-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const items = [];
+        document.querySelectorAll('.qty-input').forEach(input => {
+            const recipeId = input.getAttribute('data-recipe-id');
+            const quantity = parseInt(input.value);
+            if (recipeId && quantity > 0) {
+                items.push({ recipe_id: parseInt(recipeId), quantity });
+            }
+        });
+
+        if (items.length === 0) {
+            alert('Please add at least one recipe to the order.');
+            return;
+        }
+
+        fetch('/create/order/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),  // Add if CSRF is used
+            },
+            body: JSON.stringify({ order_items: items }),
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to submit order');
+            return response.json();
+        })
+        .then(data => {
+            alert('Order submitted successfully!');
+            this.reset();
+            orderItems.innerHTML = '';
+            window.location.href = '/orders/';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    });
+
+    // CSRF token helper for Django
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [key, value] = cookie.trim().split('=');
+            if (key === name) return value;
+        }
+        return '';
+    }
+</script>
+
+
+{% endblock content %}

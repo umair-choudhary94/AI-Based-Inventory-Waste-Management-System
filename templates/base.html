@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Inventory Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <aside class="bg-white border-r border-gray-200 w-full md:w-64 md:min-h-screen shadow-lg md:shadow-none z-20">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-gradient-to-r from-primary-500 to-secondary-500 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">UTTU</h2>
+                    </div>
+                    <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <nav id="sidebar-menu" class="hidden md:block">
+                    <div class="space-y-1">
+                        <a href="{% url 'dashboard' %}" class="nav-link active flex items-center p-3 rounded-lg text-primary-600 bg-primary-50 font-medium">
+                            <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
+                            Dashboard
+                        </a>
+                        <a href="{% url 'inventory' %}" class="nav-link flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all">
+                            <i class="fas fa-boxes w-5 h-5 mr-3"></i>
+                            Inventory
+                        </a>
+                        <a href="{% url 'recipes' %}" class="nav-link flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all">
+                            <i class="fas fa-utensils w-5 h-5 mr-3"></i>
+                            Recipes
+                        </a>
+                        <a href="{% url 'orders' %}" class="nav-link flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all">
+                            <i class="fas fa-clipboard-list w-5 h-5 mr-3"></i>
+                            Orders
+                        </a>
+                    </div>
+                    <div class="pt-8 mt-8 border-t border-gray-200">
+                        <a href="#settings" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all">
+                            <i class="fas fa-cog w-5 h-5 mr-3"></i>
+                            Settings
+                        </a>
+                        <a href="#logout" class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all">
+                            <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
+                            Logout
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-x-hidden">
+             <!-- Top Navigation Bar -->
+             <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="mobile-sidebar-button" class="md:hidden text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800 hidden md:block">Welcome back, Chef!</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 text-gray-500 hover:text-primary-600 transition-all">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <div class="relative">
+                            <button class="flex items-center space-x-2 focus:outline-none">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
+                                    C
+                                </div>
+                                <span class="hidden md:block text-sm font-medium">Chef Admin</span>
+                                <i class="fas fa-chevron-down text-xs hidden md:block"></i>
+                            </button>
+                        </div>
+                        <a href="#logout" class="md:hidden p-2 text-gray-500 hover:text-red-600 transition-all">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+            {% block content %}{% endblock content %}
+
+        </main>
+    </div>
+    {% comment %} <script src="{% static 'js/script.js' %}"></script> {% endcomment %}
+</body>
+</html>

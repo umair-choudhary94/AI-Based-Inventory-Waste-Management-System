@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Inventory, Recipe, RecipeIngredient, OrderLog
+from .models import *
 from django.contrib import admin
 from .models import Inventory, Recipe, RecipeIngredient, OrderLog
 
@@ -21,4 +21,4 @@ admin.site.register(Inventory, InventoryAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeIngredient, RecipeIngredientAdmin)
 admin.site.register(OrderLog, OrderLogAdmin)
-
+admin.site.register(InventoryNotification)

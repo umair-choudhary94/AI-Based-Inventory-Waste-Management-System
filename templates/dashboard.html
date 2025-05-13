@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+           
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section active p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
+                    <p class="text-gray-600">Monitor your kitchen inventory and operations</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Stats Cards -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-primary-100 text-primary-600 mr-4">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Inventory</p>
+                                <div class="flex items-baseline">
+                                    <p class="text-2xl font-bold" id="total-inventory">{{ total_inventory }}</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-secondary-100 text-secondary-600 mr-4">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Recipes</p>
+                                <div class="flex items-baseline">
+                                    <p class="text-2xl font-bold" id="total-recipes">{{ total_recipes }}</p>
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-amber-100 text-amber-600 mr-4">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Low Stock Alerts</p>
+                                <div class="flex items-baseline">
+                                    <p class="text-2xl font-bold" id="low-stock-count">{{ low_quantity_notifications_count }}</p>
+                                    <p class="text-xs text-red-500 ml-2">Needs attention</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-red-100 text-red-600 mr-4">
+                                <i class="fas fa-calendar-times"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Expired Items</p>
+                                <div class="flex items-baseline">
+                                    <p class="text-2xl font-bold" id="expired-count">{{ expired_notifications_count }}</p>
+                                    <p class="text-xs text-red-500 ml-2">Action required</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Inventory Chart -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Inventory Levels</h3>
+                            <div class="flex space-x-2">
+                                <button class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                    Weekly
+                                </button>
+                                <button class="text-xs px-3 py-1 rounded-full bg-primary-100 text-primary-600">
+                                    Monthly
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="inventory-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
+                            <a href="#orders" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                                View All
+                            </a>
+                        </div>
+                        <div class="overflow-x-auto scrollbar-hide">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipe</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-orders" class="divide-y divide-gray-200">
+                                    <!-- Orders will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alerts Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Alerts & Notifications</h3>
+                        {% comment %} <button class="text-sm text-gray-500 hover:text-primary-600">
+                            Mark all as read
+                        </button> {% endcomment %}
+                    </div>
+                    <div id="alerts-containe">
+                        
+                        {% for notification in inventory_notifications %}
+    <div class="relative mb-4 p-4 rounded-lg shadow-md border-l-4 
+        {% if notification.notification_type == 'low_quantity' %}
+            bg-yellow-50 border-yellow-500 text-yellow-800
+        {% elif notification.notification_type == 'expired' %}
+            bg-red-50 border-red-500 text-red-800
+        {% else %}
+            bg-gray-50 border-gray-400 text-gray-800
+        {% endif %}">
+        
+        <p class="text-sm font-medium">{{ notification.message }}</p>
+
+        <button type="button" 
+                class="absolute top-2 right-2 text-xl font-semibold text-gray-500 hover:text-gray-700"
+                onclick="this.parentElement.remove()"
+                aria-label="Close">
+            &times;
+        </button>
+    </div>
+{% endfor %}
+
+             
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inventory Section -->
+            
+
+            <!-- Recipes Section -->
+            
+
+            
+    <!-- Modals -->
+    <!-- Add Inventory Modal -->
+    <div id="add-inventory-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Add Inventory Item</h2>
+                <button class="close-modal text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="add-inventory-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="item-name">
+                        Item Name
+                    </label>
+                    <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        id="item-name" type="text" required>
+                </div>
+                <div class="mb-4 grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2" for="item-quantity">
+                            Quantity
+                        </label>
+                        <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                            id="item-quantity" type="number" step="0.01" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2" for="item-unit">
+                            Unit
+                        </label>
+                        <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                            id="item-unit" type="text" value="kg">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="item-threshold">
+                        Minimum Threshold
+                    </label>
+                    <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        id="item-threshold" type="number" step="0.01" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="item-expiry">
+                        Expiry Date
+                    </label>
+                    <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        id="item-expiry" type="date">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all">
+                        Add Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Recipe Modal -->
+    
+
+    <!-- Create Order Modal -->
+    <div id="create-order-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Create Order</h2>
+                <button class="close-modal text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="create-order-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="order-recipe">
+                        Recipe
+                    </label>
+                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        id="order-recipe" required>
+                        <option value="">Select Recipe</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="order-quantity">
+                        Quantity
+                    </label>
+                    <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        id="order-quantity" type="number" min="1" value="1" required>
+                </div>
+                <div id="recipe-ingredients" class="mb-6 p-4 bg-gray-50 rounded-lg hidden">
+                    <h3 class="font-medium mb-2 text-gray-800">Required Ingredients:</h3>
+                    <ul id="required-ingredients-list" class="space-y-1 text-sm text-gray-600">
+                        <!-- Will be populated dynamically -->
+                    </ul>
+                </div>
+                <div id="insufficient-warning" class="mb-4 p-4 bg-red-50 text-red-600 rounded-lg hidden">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle mt-0.5 mr-2"></i>
+                        <p>Warning: You have insufficient inventory for this order! Please restock before proceeding.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all">
+                        Create Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script id="inventory-data" type="application/json">
+        {{ inventory_data_json|safe }}
+    </script>
+    
+
+<script>
+
+
+    
+// Render inventory chart
+function renderInventoryChart() {
+    const inventoryData = JSON.parse(document.getElementById('inventory-data').textContent);
+    const ctx = document.getElementById('inventory-chart').getContext('2d');
+    
+    // Get top 6 inventory items by quantity
+    const chartData = [...inventoryData]
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 6);
+    
+    const labels = chartData.map(item => item.name);
+    const quantities = chartData.map(item => item.quantity);
+    const thresholds = chartData.map(item => item.min_threshold);
+    
+    // Create gradient for bars
+    const quantityGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    quantityGradient.addColorStop(0, 'rgba(14, 165, 233, 0.8)');
+    quantityGradient.addColorStop(1, 'rgba(14, 165, 233, 0.2)');
+    
+    const thresholdGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    thresholdGradient.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
+    thresholdGradient.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Current Quantity',
+                    data: quantities,
+                    backgroundColor: quantityGradient,
+                    borderColor: 'rgb(14, 165, 233)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
+                },
+                {
+                    label: 'Minimum Threshold',
+                    data: thresholds,
+                    backgroundColor: thresholdGradient,
+                    borderColor: 'rgb(239, 68, 68)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#475569',
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    callbacks: {
+                        labelPointStyle: function(context) {
+                            return {
+                                pointStyle: 'rectRounded',
+                                rotation: 0
+                            };
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        drawBorder: false,
+                        color: 'rgba(226, 232, 240, 0.7)'
+                    },
+                    ticks: {
+                        padding: 10,
+                        color: '#64748b'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        padding: 10,
+                        color: '#64748b'
+                    }
+                }
+            }
+        }
+    });
+}
+renderInventoryChart();  
+</script>
+{% endblock content %}

@@ -19,10 +19,36 @@ class Inventory(models.Model):
 
     def check_and_notify(self):
         if self.quantity < self.min_threshold:
-            print(f"Low Inventory Alert: The stock for '{self.name}' is below the threshold. Quantity: {self.quantity}{self.unit}.")
+            message = f"Low Inventory Alert: The stock for '{self.name}' is below the threshold. Quantity: {self.quantity}{self.unit}."
+            print(message)
+            InventoryNotification.objects.create(
+                inventory_item=self,
+                notification_type='low_quantity',
+                message=message
+            )
 
         if self.expiry_date and self.expiry_date <= timezone.now().date():
-            print(f"Expired Inventory Alert: The item '{self.name}' has expired on {self.expiry_date}. Please take action.")
+            message = f"Expired Inventory Alert: The item '{self.name}' has expired on {self.expiry_date}. Please take action."
+            print(message)
+            InventoryNotification.objects.create(
+                inventory_item=self,
+                notification_type='expired',
+                message=message
+            )
+class InventoryNotification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('low_quantity', 'Low Quantity'),
+        ('expired', 'Expired'),
+    )
+
+    inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.inventory_item.name} - {self.get_notification_type_display()} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 # Recipe Model
@@ -41,10 +67,22 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.recipe.name} needs {self.quantity_required}{self.inventory_item.unit} of {self.inventory_item.name}"
+class RecipePrice(models.Model):
+    recipe = models.OneToOneField(Recipe, on_delete=models.CASCADE, related_name='price')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def __str__(self):
+        return f"{self.recipe.name} - ${self.price}"
+
+class Order(models.Model):
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Order #{self.id} at {self.timestamp}"
 
 # Order Log
 class OrderLog(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, null=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(default=timezone.now)
     quantity_made = models.PositiveIntegerField(default=1)
@@ -63,4 +101,6 @@ class OrderLog(models.Model):
             inventory_item.quantity -= total_required
             inventory_item.save()
             inventory_item.check_and_notify()
+
+
     
