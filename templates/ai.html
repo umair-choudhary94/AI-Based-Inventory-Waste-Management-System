@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class=" mx-auto px-6 py-12 font-sans">
+    <h2 class="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 mb-8 text-center">AI Insight</h2>
+
+    <!-- Fancy spinner shown while loading -->
+    <div id="loading" class="flex flex-col items-center justify-center py-16">
+        <!-- Fancy spinner with multiple elements -->
+        <div class="relative w-24 h-24">
+            <!-- Outer spinning ring -->
+            <div class="absolute inset-0 rounded-full border-8 border-blue-200 opacity-25"></div>
+            
+            <!-- Middle spinning ring -->
+            <div class="absolute inset-2 rounded-full border-8 border-t-purple-600 border-r-transparent border-b-blue-500 border-l-transparent animate-spin"></div>
+            
+            <!-- Inner pulsing circle -->
+            <div class="absolute inset-5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 animate-pulse"></div>
+            
+            <!-- Center dot -->
+            <div class="absolute inset-9 rounded-full bg-white"></div>
+        </div>
+        
+        <!-- Loading text with gradient -->
+        <p class="mt-8 text-lg font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 animate-pulse">Processing your request...</p>
+    </div>
+
+    <!-- Container to display AI response with Markdown rendering -->
+    <div id="ai-response" class="hidden bg-white border border-gray-100 rounded-xl  p-8 transition-all duration-500 transform hover:shadow-xl relative">
+        <!-- Decorative elements -->
+        <div class="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-purple-500 opacity-75"></div>
+        <div class="absolute -bottom-3 -right-3 w-6 h-6 rounded-full bg-blue-500 opacity-75"></div>
+        
+        <!-- This div will contain the rendered Markdown -->
+        <div id="markdown-content" class="prose prose-slate max-w-none">
+            <!-- Markdown content will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Container to display error messages -->
+    <div id="error-message" class="hidden mt-8 text-center text-red-500 bg-red-50 p-6 rounded-xl border border-red-200 shadow-md">
+        <svg class="w-8 h-8 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="font-medium"></span>
+    </div>
+</div>
+
+<!-- Add custom animations and Markdown styles -->
+<style>
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .text-gradient {
+        background-size: 200% auto;
+        animation: gradient 3s ease infinite;
+    }
+    
+    /* Fade in animation for the response */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.8s ease forwards;
+    }
+    
+    /* Custom Markdown styling to enhance Tailwind's prose */
+    .prose h1 {
+        @apply text-2xl font-bold mt-6 mb-4 text-gray-800;
+    }
+    
+    .prose h2 {
+        @apply text-xl font-bold mt-5 mb-3 text-gray-800;
+    }
+    
+    .prose h3 {
+        @apply text-lg font-bold mt-4 mb-2 text-gray-800;
+    }
+    
+    .prose p {
+        @apply my-3 text-gray-700;
+    }
+    
+    .prose ul {
+        @apply list-disc pl-5 my-3 text-gray-700;
+    }
+    
+    .prose ol {
+        @apply list-decimal pl-5 my-3 text-gray-700;
+    }
+    
+    .prose blockquote {
+        @apply pl-4 border-l-4 border-purple-300 italic my-4 text-gray-600;
+    }
+    
+    .prose pre {
+        @apply bg-gray-800 text-gray-100 rounded-md p-4 overflow-x-auto my-4;
+    }
+    
+    .prose code:not(pre code) {
+        @apply bg-gray-100 text-purple-600 px-1.5 py-0.5 rounded text-sm;
+    }
+    
+    .prose a {
+        @apply text-blue-600 hover:text-blue-800 underline;
+    }
+    
+    .prose table {
+        @apply border-collapse border border-gray-300 my-4 w-full;
+    }
+    
+    .prose th, .prose td {
+        @apply border border-gray-300 p-2;
+    }
+    
+    .prose th {
+        @apply bg-gray-100;
+    }
+    
+    .prose hr {
+        @apply my-6 border-t border-gray-300;
+    }
+</style>
+
+<!-- Include marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- Include highlight.js for code syntax highlighting -->
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github-dark.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Configure marked with highlight.js for code highlighting
+    marked.setOptions({
+        highlight: function(code, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                return hljs.highlight(code, { language: lang }).value;
+            }
+            return hljs.highlightAuto(code).value;
+        },
+        breaks: true,
+        gfm: true
+    });
+    
+    // Call your backend API to fetch AI content
+    fetch('{% url "ai_fetch" %}')
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            // Hide spinner with fade out
+            const loading = document.getElementById('loading');
+            loading.style.opacity = '0';
+            loading.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                // Parse Markdown and insert rendered HTML
+                const markdownContent = document.getElementById('markdown-content');
+                markdownContent.innerHTML = marked.parse(data.ai_text);
+                
+                // Apply syntax highlighting to code blocks
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+                
+                // Show AI response with animation
+                const response = document.getElementById('ai-response');
+                response.style.display = 'block';
+                response.classList.add('fade-in', 'relative');
+            }, 500);
+        })
+        .catch(error => {
+            // Hide spinner
+            document.getElementById('loading').style.display = 'none';
+            
+            // Show error message with animation
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.querySelector('span').textContent = 'Failed to fetch AI response: ' + error.message;
+            errorDiv.style.display = 'block';
+            errorDiv.classList.add('fade-in');
+        });
+});
+</script>
+
+{% endblock content %}

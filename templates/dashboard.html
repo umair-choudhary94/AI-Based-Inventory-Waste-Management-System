@@ -78,44 +78,49 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-lg font-semibold text-gray-800">Inventory Levels</h3>
-                            <div class="flex space-x-2">
-                                <button class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
-                                    Weekly
-                                </button>
-                                <button class="text-xs px-3 py-1 rounded-full bg-primary-100 text-primary-600">
-                                    Monthly
-                                </button>
-                            </div>
+                           
                         </div>
                         <div class="chart-container">
                             <canvas id="inventory-chart"></canvas>
                         </div>
                     </div>
                     
-                    <!-- Recent Orders -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
-                            <a href="#orders" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
-                                View All
-                            </a>
-                        </div>
-                        <div class="overflow-x-auto scrollbar-hide">
-                            <table class="min-w-full">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipe</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-orders" class="divide-y divide-gray-200">
-                                    <!-- Orders will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                  <!-- AI Analysis Summary -->
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
+    <h2 class="text-lg font-semibold text-gray-800">🧠 AI Insight Summary</h2>
+
+    <!-- Spinner -->
+    <div id="ai-spinner" class="flex items-center space-x-2 text-blue-600">
+        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span>Analyzing inventory and orders to reduce food waste...</span>
+    </div>
+
+    <!-- AI Response Container -->
+    <div id="ai-response"
+         class="w-full bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-inner text-sm text-gray-700 hidden mt-5">
+        <!-- AI-generated text will appear here -->
+    </div>
+</div>
+
+            <script>
+                // Simulate backend AI fetch
+                document.addEventListener("DOMContentLoaded", () => {
+                    setTimeout(() => {
+                        const spinner = document.getElementById('ai-spinner');
+                        const response = document.getElementById('ai-response');
+
+                        spinner.classList.add('hidden');
+                        response.classList.remove('hidden');
+                        response.innerText = "✅ To reduce food waste, prioritize using items nearing expiry, monitor low stock levels daily, and apply discounts to slow-moving ingredients. AI recommends optimizing purchase frequency based on real-time consumption.";
+                    }, 3000); // Simulated AI response delay
+                });
+            </script>
+
                 </div>
                 
                 <!-- Alerts Section -->

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl p-6 w-full shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Add Supplier</h2>
+        </div>
+
+        <!-- Add CSRF token and method=POST for Django form submission -->
+        <form id="add-supplier-form" method="POST" action="{% url 'add_supplier' %}">
+            {% csrf_token %}
+
+            <!-- Supplier Name -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-name">
+                    Supplier Name
+                </label>
+                <input name="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-name" type="text" required>
+            </div>
+
+            <!-- Supplier Email -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-email">
+                    Supplier Email
+                </label>
+                <input name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-email" type="email" required>
+            </div>
+
+            <!-- Supplier Phone Number -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-phone-number">
+                    Supplier Phone Number
+                </label>
+                <input name="phone_number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-phone-number" type="text" required>
+            </div>
+
+            <!-- Supplier Address -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-address">
+                    Supplier Address
+                </label>
+                <textarea name="address" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-address" rows="5" required></textarea>
+            </div>
+
+            <!-- Supplier City -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-city">
+                    Supplier City
+                </label>
+                <input name="city" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-city" type="text" required>
+            </div>
+
+            <!-- Supplier State -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-state">
+                    Supplier State
+                </label>
+                <input name="state" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-state" type="text" required>
+            </div>
+
+            <!-- Supplier Country -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-country">
+                    Supplier Country
+                </label>
+                <input name="country" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-country" type="text" required>
+            </div>
+
+            <!-- Supplier Zip Code -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="supplier-zip-code">
+                    Supplier Zip Code
+                </label>
+                <input name="zip_code" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    id="supplier-zip-code" type="text" required>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex justify-end space-x-3">
+                <a href="" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
+                    Cancel
+                </a>
+                <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all">
+                    Add Supplier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+

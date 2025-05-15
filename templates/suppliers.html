@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="suppliers-section" class="section  p-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Supplier Management</h2>
+            <p class="text-gray-600">Manage your suppliers and their details</p>
+        </div>
+        <a href='/add/supplier/' id="add-supplier-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> Add New Supplier
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="suppliers-container">
+        {% for supplier in suppliers %}
+            <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-200 p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{ supplier.name }}</h2>
+    
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-2">Details:</h3>
+                    <div class="space-y-2">
+                        <p class="text-gray-700">Email: {{ supplier.email }}</p>
+                        <p class="text-gray-700">Phone Number: {{ supplier.phone_number }}</p>
+                        <p class="text-gray-700">Address: {{ supplier.address }}</p>
+                        <p class="text-gray-700">City: {{ supplier.city }}</p>
+                        <p class="text-gray-700">State: {{ supplier.state }}</p>
+                        <p class="text-gray-700">Country: {{ supplier.country }}</p>
+                        <p class="text-gray-700">Zip Code: {{ supplier.zip_code }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+</section>
+{% endblock content %}
