@@ -14,5 +14,7 @@ urlpatterns = [
     path('add/supplier/', views.add_supplier, name='add_supplier'),
     path('ai/', views.ai, name='ai'),
     path('ai_fetch/', views.ai_fetch, name='ai_fetch'),
+    path('login/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
 ]
 

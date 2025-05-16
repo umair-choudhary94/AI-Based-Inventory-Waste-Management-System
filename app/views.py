@@ -4,6 +4,10 @@ from datetime import date, timedelta,datetime
 from django.http import JsonResponse
 import json
 from google import genai
+from django.contrib.auth import authenticate, login,logout
+from django.contrib import messages
+
+
 # Create your views here.
 def index(request):
     
@@ -211,6 +215,38 @@ def ai_fetch(request):
         'ai_text': ai_summary
     }
     return JsonResponse(data)
+
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remember_me = request.POST.get('remember-me', False)
+
+        # Assuming there's a function to authenticate users
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            if remember_me:
+                # Set session to remember user for a longer period
+                request.session.set_expiry(1209600)  # 2 weeks
+            else:
+                # Set session to expire at browser close
+                request.session.set_expiry(0)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password.')
+            return render(request, 'login.html')
+        pass
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login_view')
+
+
+
 
 
 
